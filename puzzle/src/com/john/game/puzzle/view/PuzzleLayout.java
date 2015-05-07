@@ -76,6 +76,9 @@ public class PuzzleLayout extends RelativeLayout implements OnClickListener {
   	
   	//计时器
   	private int mTime;
+  	
+  	//游戏暂停
+  	private boolean isPause;
 
 
 	public PuzzleListener mListener;
@@ -102,18 +105,19 @@ public class PuzzleLayout extends RelativeLayout implements OnClickListener {
   			switch(msg.what){
   			case TIME_CHANGED:
   				//通关或失败计时结束
-  				if(isGameSuccess || isGameOver){
+  				if(isGameSuccess || isGameOver || isPause){
   					return;
   				}
   				
   				//判断时间是否被监听，通过主界面修改时间
   				if(mListener != null){
   					mListener.timeChanged(mTime);
-  					if(mTime == 0){
-  	  					isGameOver = true;
-  	  					mListener.gameover();
-  	  				}
   				}
+  				if(mTime == 0){
+	  					isGameOver = true;
+	  					mListener.gameover();
+	  					return;
+	  				}
   				mTime--;
   				//每过一秒发送一次
   				mHandler.sendEmptyMessageDelayed(TIME_CHANGED, 1000);
@@ -127,10 +131,6 @@ public class PuzzleLayout extends RelativeLayout implements OnClickListener {
   					nextLevel();
   				}
   				break;
-  			
-  			default:
-  				break;
-  			
   			}
   			
   		};
@@ -445,6 +445,30 @@ public class PuzzleLayout extends RelativeLayout implements OnClickListener {
 		 }
 		
 	}
+	
+	public void pause(){
+		isPause = true;
+		mHandler.removeMessages(TIME_CHANGED);
+	}
+	
+	public void resume(){
+		if(isPause = true){
+			isPause = false;
+			mHandler.sendEmptyMessage(TIME_CHANGED);
+		}
+	}
+	
+	
+	/**
+	 * 重新开始
+	 */
+	public void restart(){
+		isGameOver = false;
+		mColumn --;
+		nextLevel();
+	}
+	
+	
 	
 	/**
 	 * 进入下一关
